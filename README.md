@@ -37,16 +37,22 @@ However, if you move the “Awesome” group somewhere else, the path becomes in
 Every group, sheet and filter has a unique identifier. If you're using iCloud or a local library, the identifier remains the same even if you edit, rename or move the item. It's like the number on your ID card, which doesn't change when you move or change your last name. In external folders, the identifier can change if you move or rename an item. An identifier looks like this:  
 `DCj45UWKr_g15y2vBPwJdQ`.
 
-To get the identifier of an item:
+**On iOS**, You can get the x-callback identifier or URL of a sheet or a group by following these steps:
 
-- On iOS, open the sheet list or library. Swipe-left on a sheet or group in iCloud or your local library, and tap the “More” button. Select the “Share” action and tap the “Copy Identifier” activity.
-- On macOS, hold ⌥ while right-clicking a sheet or group in iCloud or your local library. Select “Copy Callback Identifier” from the menu.
+- Open the sheet list
+- Touch and hold a sheet to open the menu
+- Select the “Share” action
+- Tap “Share Shortcuts Identifier” activity for the identifier, “Copy Callback URL” for the whole URL
+- Tap “Copy”
+- To get the identifier of a group, tap the `…` button in the top right of the sheet list, select “Share” and follow the same steps
 
-The identifier is copied to the clipboard. You can then paste it into a URL, like this:
+**On Mac**, you can select the sheet in the sheet list and press ⌘C (command-C). Alternatively, hold ⌥ (alt/option) while right-clicking a group in the Library, or a sheet in the sheet list. Select “Copy Callback Identifier”/“Copy Callback URL” from the context menu.
+
+The identifier is copied to the pasteboard. You can then paste it into a URL, like this:
 
 	ulysses://x-callback-url/new-group?name=Best&parent=DCj45UWKr_g15y2vBPwJdQ
 
-This URL will work regardless of how you rename the item, or where you move it.
+The identifier has a URL-safe encoding that can be directly passed to your x-callback action. The URL will work regardless of how you rename the item, or where you move it.
 
 ## x-callback Parameters
 In addition to action parameters, there are some generic parameters you can provide **optionally** for any action. Many automation apps provide these arguments automatically:
@@ -610,9 +616,7 @@ Opens an item (sheet or group) with a particular [identifier](#identifier) in Ul
 
 **Notes:**
 
-You can get a URL for opening sheets and groups directly within Ulysses.
-On iOS, just swipe on any sheet or group and select the action "More". Then tap the "Share…" action and choose the "Copy URL" activity. A URL for opening your sheet or group has been now placed on your pasteboard.
-On the Mac, hold ⌥ while right-clicking an item in the Library, or a sheet in the sheets column. Select „Copy Callback URL” from the menu.
+You can get a URL for opening sheets and groups directly within Ulysses. **On iOS**, touch and hold on any sheet, tap “Share” action, choose the “Copy Callback URL”. A URL for opening your sheet  has been now placed on your pasteboard. To get the callback URL for a group, open the group in the sheet list, tap the `…` button in the top right, select “Share” and “Copy Callback URL”. **On Mac**, select the sheet and press ⌘C (command-C). Alternatively, hold ⌥ (alt/option) while right-clicking a group in the Library, or a sheet in the sheet list. Select “Copy Callback URL” from the context menu.
 
 **Example:**
 
