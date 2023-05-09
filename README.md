@@ -1,118 +1,4 @@
-# Getting Started with X-Callback Actions
-Ulysses can talk to other apps on Mac and iOS using a feature called *X-Callback-URL*. This allows you to send text and images from other apps to Ulysses (and vice versa), and automate repetitive tasks.
-
-## The Basics
-An X-Callback-URL looks like a web address, for example:
-
-	ulysses://x-callback-url/open-all
-
-The first part, `ulysses://`, indicates that Ulysses is the receiving app. The `x-callback-url` part tells Ulysses that the address is an X-Callback-URL. This front part is always the same. The `open-all` indicates the action that should be performed. In this case, Ulysses will open the “All” filter.
-
-A simple way to run an action is to copy and paste it into your web browser's address bar and press ⏎. You can try it right now with the address above, or by clicking [here](ulysses://x-callback-url/open-all). Ulysses should open and show the "All" filter.
-
-## Action Parameters
-Ulysses has a `new-group` action which creates a new group. For example:
-
-	ulysses://x-callback-url/new-group?name=Ideas
-
-Running this action will create a new group named “Ideas”. Note the `?` after the action name. Anything after it are parameters for the action. The `new-group` action has a `name` parameter, which is the name of the new group. Parameter values are passed like this: `some-parameter-name=some-value`.
-
-You may have noticed that the new group was created inside the *top level group*. Depending on your preferences, this could be “iCloud”, “On My Mac/iPhone/iPad” or an external folder. It's easy to create a new group inside an existing parent group:
-
-	ulysses://x-callback-url/new-group?name=Awesome&parent=Ideas
-
-This will create a new group “Awesome” inside of the “Ideas” group we created earlier. As you can see, multiple parameters in a URL are separated by an `&`.
-
-Parameters must be *URL encoded*, meaning that spaces and special characters need to be replaced. For example, “Pots & Pans” becomes `Pots%20%26%20Pans`. You can use [this website](http://meyerweb.com/eric/tools/dencoder/) to encode a text.
-
-<a id="identifier"></a>
-
-## Paths and Identifiers
-In the previous section, you have created a new group inside the “Ideas” group by using the parameter `parent=Ideas`. This works fine as long as there is just one group named “Ideas” in your library. If you have more than one group with the same name, you can use a *path* to pick a specific one. A path starts with a slash character `/` and tells Ulysses where to go, starting at the top level group. For example, the path `/Ideas/Awesome` points to the “Awesome” group you've created above.
-
-	ulysses://x-callback-url/new-group?name=Best&parent=/Ideas/Awesome
-
-However, if you move the “Awesome” group somewhere else, the path becomes invalid. This means that any URLs that refer to it will stop working, until you change them to use the new path. This can become tedious, so a better way is to use the *identifier* of the “Awesome” group.
-
-Every group, sheet and filter has a unique identifier. If you're using iCloud or a local library, the identifier remains the same even if you edit, rename or move the item. It's like the number on your ID card, which doesn't change when you move or change your last name. In external folders, the identifier can change if you move or rename an item. An identifier looks like this:  
-`DCj45UWKr_g15y2vBPwJdQ`.
-
-**On iOS**, You can get the x-callback identifier or URL of a sheet or a group by following these steps:
-
-- Open the sheet list
-- Touch and hold a sheet to open the menu
-- Select the “Share” action
-- Tap “Share Shortcuts Identifier” activity for the identifier, “Copy Callback URL” for the whole URL
-- Tap “Copy”
-- To get the identifier of a group, tap the `…` button in the top right of the sheet list, select “Share” and follow the same steps
-
-**On Mac**, you can select the sheet in the sheet list and press ⌘C (command-C). Alternatively, hold ⌥ (alt/option) while right-clicking a group in the Library, or a sheet in the sheet list. Select “Copy Callback Identifier”/“Copy Callback URL” from the context menu.
-
-The identifier is copied to the pasteboard. You can then paste it into a URL, like this:
-
-	ulysses://x-callback-url/new-group?name=Best&parent=DCj45UWKr_g15y2vBPwJdQ
-
-The identifier has a URL-safe encoding that can be directly passed to your x-callback action. The URL will work regardless of how you rename the item, or where you move it.
-
-## x-callback Parameters
-In addition to action parameters, there are some generic parameters you can provide **optionally** for any action. Many automation apps provide these arguments automatically:
-
--   `x-success`  
-        URL that should be opened when an action has been successfully completed. If not provided, the user stays in Ulysses. The URL will retrieve at least the following arguments:
-    1. `targetId`  
-       The ID of the sheet or group that was either created, modified or revealed by the action.
-    2. `targetURL`  
-       A URL that can be used to open the sheet or group that has been created , modified or revealed by the action. Depending on the action, the URL may retrieve more arguments containing additional results.
-- `x-error`  
-        URL to be opened if an error occurred. It will retrieve the arguments `errorCode` and `errorMessage` providing further details on the error. Errors will mostly occur, if an identifier cannot be resolved. If not provided, the user stays in Ulysses if an error occurred.
-
-**Example:**
-
-If a new sheet should be created and Ulysses should return to the calling app, use the following URL (line breaks are for legibility):
-
-	ulysses://x-callback-url/new-sheet?
-	    x-success=sourceapp://x-callback-url/success&
-	    group=Lecture Notes
-
-On success, Ulysses will call the following URL to return to the calling app:
-
-	sourceapp://x-callback-url/success?
-	    targetId=H8zLAmc1I0njH-0Ql-3YGQ&
-	    targetURL=ulysses://x-callback-url/open?id=H8zLAmc1I0njH-0Ql-3YGQ
-
-<a id="authorization"></a>
-
-## Authorization
-To protect the Ulysses library against access from malicious apps, actions that expose content or destructively change require the calling app to be authorized.
-
-<span class="availability-version">*Available since Ulysses 2.8 ([API version 2](#api-versions)).*</span>
-
-Authorizing an app `My App` consists of these steps:
-
-1. `My App` calls Ulysses' `authorize` action. The action has a required argument `appname`, which must be set to the name of the calling app. For example:  
-
-	```
-	ulysses://x-callback-url/authorize?appname=My App&x-success=myapp://x-callback-url/auth-success
-	```
-	
-2. Ulysses asks the user to allow or deny `My App` access to the Ulysses library.
-3. If the user allows access, Ulysses calls the `x-success` callback (in the example `myapp://x-callback-url/auth-success`) and sets the parameter `access-token`.
-   If the user denies access, Ulysses calls the provided `x-error` callback.
-4. `My App` stores the access token, and passes it to Ulysses when calling actions that require authorization. For example:  
-
-	```
-	ulysses://x-callback-url/get-item?id=H8zLAmc1I0njH-0Ql-3YGQ&recursive=NO&access-token=464b33b8ea994f2784dbedca60de0ebf
-	```
-
-<a id="silent-mode"></a>
-
-## Silent Mode
-
-By default, when an item is affected by an action (e.g. moved), Ulysses reveals it to the user. To prevent this, add the parameter `silent-mode=YES` to the URL.
-
-<span class="availability-version">*Available since Ulysses 2.8 ([API version 2](#api-versions)).*</span>
-
-On MacOS, an app can also prevent Ulysses switching to foreground. This can be done by setting the option `NSWorkspaceLaunchWithoutActivation` when opening the URL using `NSWorkspace`.
+Ulysses supports [x-callback URLs](http://x-callback-url.com/), allowing other apps to trigger certain actions in Ulysses such as opening existing sheets or creating new sheets, groups or attachments.
 
 # Reference
 
@@ -643,6 +529,110 @@ The `x-success` callback retrieves two arguments:
 
 - `apiVersion`: The version of Ulysses' X-Callback API (e.g. `2`). Use this to find out which actions (and parameters) are supported.
 - `buildNumber`: The build version number of Ulysses itself (e.g. `32193`).
+
+# Concepts
+
+<a id="identifier"></a>
+
+## Identifiers
+
+Several callbacks use so-called identifier arguments to specify the sheet or group an operation should be executed on. Identifiers are 22 characters long and are in a URL-safe encoding. For example:
+
+    ulysses://x-callback-url/open?id=DCj45UWKr_g15y2vBPwJdQ
+
+will open the item with this identifier.
+
+Identifiers are created internally by Ulysses and allow to reference sheets and groups. If you’re using iCloud or a local library, an identifier remains the same, even if the item is edited, renamed or moved around. In external folders, the identifier can change if you move or rename an item.
+
+**On iOS**, you can get the x-callback identifier or URL of a sheet or a group by following these steps:
+
+- Open the sheet list
+- Touch and hold a sheet to open the menu
+- Select the “Share” action
+- Tap “Share Shortcuts Identifier” activity for the identifier, “Copy Callback URL” for the whole URL
+- Tap “Copy”
+- To get the identifier of a group, tap the `…` button in the top right of the sheet list, select “Share” and follow the same steps
+
+**On Mac**, you can select the sheet in the sheet list and press ⌘C (command-C). Alternatively, hold ⌥ (alt/option) while right-clicking a group in the Library, or a sheet in the sheet list. Select “Copy Callback Identifier”/“Copy Callback URL” from the context menu.
+
+The identifier is copied to the pasteboard. You can then paste it into a URL, like this:
+
+	ulysses://x-callback-url/new-group?name=Best&parent=DCj45UWKr_g15y2vBPwJdQ
+
+The identifier has a URL-safe encoding that can be directly passed to your x-callback action. The URL will work regardless of how you rename the item, or where you move it.
+
+<a id="path"></a>
+
+## Paths
+
+As an alternative to identifiers, the target group of many actions can be also specified by a path of group names. Usually, a path refers to groups inside the sections “iCloud”, “On My iPad” or “On My iPhone”. However, if a path begins with the name of an external folder (e.g. Dropbox), Ulysses will resolve the path within this folder.
+
+A path must begin with a slash character **/**. Ulysses will try to match the group names in the path with the original casing first. If the group is not found, Ulysses will fall back to case-insensitive matching.
+
+**Example:**
+
+- **/Books/Huckleberry Finn** matches a group named “Huckleberry Finn” inside the group “Books”.
+- **/My Dropbox/Reports**: If a Dropbox folder “My Dropbox” exists, this path will match the folder “Reports” inside of it.
+
+## x-callback Parameters
+In addition to action parameters, there are some generic parameters you can provide **optionally** for any action. Many automation apps provide these arguments automatically:
+
+-   `x-success`  
+        URL that should be opened when an action has been successfully completed. If not provided, the user stays in Ulysses. The URL will retrieve at least the following arguments:
+    1. `targetId`  
+       The ID of the sheet or group that was either created, modified or revealed by the action.
+    2. `targetURL`  
+       A URL that can be used to open the sheet or group that has been created , modified or revealed by the action. Depending on the action, the URL may retrieve more arguments containing additional results.
+- `x-error`  
+        URL to be opened if an error occurred. It will retrieve the arguments `errorCode` and `errorMessage` providing further details on the error. Errors will mostly occur, if an identifier cannot be resolved. If not provided, the user stays in Ulysses if an error occurred.
+
+**Example:**
+
+If a new sheet should be created and Ulysses should return to the calling app, use the following URL (line breaks are for legibility):
+
+	ulysses://x-callback-url/new-sheet?
+	    x-success=sourceapp://x-callback-url/success&
+	    group=Lecture Notes
+
+On success, Ulysses will call the following URL to return to the calling app:
+
+	sourceapp://x-callback-url/success?
+	    targetId=H8zLAmc1I0njH-0Ql-3YGQ&
+	    targetURL=ulysses://x-callback-url/open?id=H8zLAmc1I0njH-0Ql-3YGQ
+
+<a id="authorization"></a>
+
+## Authorization
+To protect the Ulysses library against access from malicious apps, actions that expose content or destructively change require the calling app to be authorized.
+
+<span class="availability-version">*Available since Ulysses 2.8 ([API version 2](#api-versions)).*</span>
+
+Authorizing an app `My App` consists of these steps:
+
+1. `My App` calls Ulysses' `authorize` action. The action has a required argument `appname`, which must be set to the name of the calling app. For example:  
+
+	```
+	ulysses://x-callback-url/authorize?appname=My App&x-success=myapp://x-callback-url/auth-success
+	```
+	
+2. Ulysses asks the user to allow or deny `My App` access to the Ulysses library.
+3. If the user allows access, Ulysses calls the `x-success` callback (in the example `myapp://x-callback-url/auth-success`) and sets the parameter `access-token`.
+   If the user denies access, Ulysses calls the provided `x-error` callback.
+4. `My App` stores the access token, and passes it to Ulysses when calling actions that require authorization. For example:  
+
+	```
+	ulysses://x-callback-url/get-item?id=H8zLAmc1I0njH-0Ql-3YGQ&recursive=NO&access-token=464b33b8ea994f2784dbedca60de0ebf
+	```
+
+<a id="silent-mode"></a>
+
+## Silent Mode
+
+By default, when an item is affected by an action (e.g. moved), Ulysses reveals it to the user. To prevent this, add the parameter `silent-mode=YES` to the URL.
+
+<span class="availability-version">*Available since Ulysses 2.8 ([API version 2](#api-versions)).*</span>
+
+On MacOS, an app can also prevent Ulysses switching to foreground. This can be done by setting the option `NSWorkspaceLaunchWithoutActivation` when opening the URL using `NSWorkspace`.
 
 <a id="api-versions"></a>
 
