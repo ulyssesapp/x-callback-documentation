@@ -372,8 +372,8 @@ If the item is a group, then the info object has this format:
     - `filter`
     - `trash`
     - `project` - The root group of a project ([API version 3](#api-versions))
-    - `project-content` - The main content section of a project ([API version 3](#api-versions))
-    - `project-extras` - The extras section of a project ([API version 3](#api-versions))
+    - `projectMain` - The main content section of a project ([API version 3](#api-versions))
+    - `projectExtras` - The extras section of a project ([API version 3](#api-versions))
     - `other` – Technical group type.
 - `identifier`  
   The [identifier](#identifier) of the group.
