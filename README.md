@@ -39,7 +39,7 @@ In the following, all available actions are detailed. Please note that for reaso
 
 Creates a new sheet.
 
-<span class="availability-version">*Available on iOS since Ulysses 2.6 ([API version 1](#api-versions)), on Mac since Ulysses 2.8 ([API version 2](#api-versions)).*</span>
+<span class="availability-version">*Available on iOS since Ulysses 2.6 ([API version 1](#api-versions)), on Mac since Ulysses 2.8 ([API version 2](#api-versions)). Material sheets can be created since Ulysses 31 ([API version 3](#api-versions)).*</span>
 
 **Parameters:**
 
@@ -56,6 +56,9 @@ Creates a new sheet.
 - `index`  
         Optional. The position of the new sheet in its parent group. Use `0` to make it the first sheet.  
         <span class="availability-version">*Available since Ulysses 2.8 ([API version 2](#api-versions)).*</span>
+- `material`
+        Optional. Whether or not the sheet should be created as material sheet. Defaults to `NO`.
+        <span class="availability-version">*Available since Ulysses 31 ([API version 3](#api-versions)).*</span>
 
 **Example:**
 
@@ -364,7 +367,14 @@ If the item is a group, then the info object has this format:
 - `title`  
   The title of the group.
 - `type`  
-  The type of the item. This can be `group`, `filter` or `trash`.
+  The type of the item. This can be either:
+    - `group` – A regular group.
+    - `filter`
+    - `trash`
+    - `project` - The root group of a project ([API version 3](#api-versions))
+    - `projectMain` - The main content section of a project ([API version 3](#api-versions))
+    - `projectExtras` - The extras section of a project ([API version 3](#api-versions))
+    - `other` – Technical group type.
 - `identifier`  
   The [identifier](#identifier) of the group.
 - `hasLifetimeIdentifier`
@@ -388,6 +398,8 @@ If the item is a sheet, then the object has this format:
   The [identifier](#identifier) of the sheet.
 - `hasLifetimeIdentifier`  
   Whether the identifier stays the same even if the group is moved or renamed. `true` for items that are stored in the sections "iCloud" or "On My Mac" / "On My iPad". `false` for items in external folders or Dropbox.
+- `isMaterial`
+  Whether the item is a material sheet (`true`) or a regular sheet (`false`). ([API version 3](#api-versions))
 - `changeToken`  
   A value that identifies the current verison of the sheet. The change token will have a different value whenever the sheet changes.
 - `modificationDate`  
@@ -454,6 +466,8 @@ The `x-success` callback retrieves an argument `sheet`. The value is a URL-encod
   The [identifier](#identifier) of the sheet.
 - `hasLifetimeIdentifier`  
   Whether the identifier stays the same even if the group is moved or renamed. `true` for items that are stored in the sections "iCloud" or "On My Mac" / "On My iPad". `false` for items in external folders or Dropbox.
+- `isMaterial`
+  Whether the item is a material sheet (`true`) or a regular sheet (`false`). ([API version 3](#api-versions))  
 - `text`  
   The sheets content encoded as Markdown. This is only available if the `text` parameter was set to `YES`.
 - `keywords`  
@@ -527,7 +541,7 @@ Retrieves the build number of Ulysses, and the [version of Ulysses' X-Callback A
 
 The `x-success` callback retrieves two arguments:
 
-- `apiVersion`: The version of Ulysses' X-Callback API (e.g. `2`). Use this to find out which actions (and parameters) are supported.
+- `apiVersion`: The version of Ulysses' X-Callback API (e.g. `3`). Use this to find out which actions (and parameters) are supported.
 - `buildNumber`: The build version number of Ulysses itself (e.g. `32193`).
 
 # Concepts
@@ -648,3 +662,5 @@ The table below shows the API versions supported by different versions of Ulysse
 | ----------- | --------------- |
 | 1           | 2.6, iOS only.  |
 | 2           | 2.8             |
+| 3           | 31              |
+
